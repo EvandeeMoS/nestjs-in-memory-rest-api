@@ -1,4 +1,4 @@
-export class UserEntity {
+export class User {
     id: string;
     fullName: string;
     document: string;

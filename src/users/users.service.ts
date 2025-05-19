@@ -3,7 +3,6 @@ import { Database } from 'src/db';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
-import { UserEntity } from './model/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +17,8 @@ export class UsersService {
 
     create(data: CreateUserDto) {
         const id = randomUUID();
-        return Database.users.push({id: id, ...data});
+        Database.users.push({id: id, ...data});
+        return Database.users.find(user => user.id === id);
     }
 
     update(id: string, data: UpdateUserDto) {
