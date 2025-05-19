@@ -20,8 +20,8 @@ export class UsersService {
 
     create(data: CreateUserDto) {
         const id = randomUUID();
-        const wallet: Wallet = this.walletsService.create({value: 0, ownerId: id})!;
-        Database.users.push({id: id, ...data, walletsIds: [wallet.id]});
+        const wallet: Wallet | undefined = this.walletsService.create({value: 0, ownerId: id})!;
+        Database.users.push({id: id, ...data, walletId: wallet.id});
         return Database.users.find(user => user.id === id);
     }
 
@@ -34,7 +34,7 @@ export class UsersService {
             document: data.document? data.document : oldData!.document,
             email: data.email? data.email : oldData!.email,
             password: data.password? data.password : oldData!.password,
-            walletsIds: data.walletsIds? data.walletsIds : oldData!.walletsIds,
+            walletId: data.walletId? data.walletId : oldData!.walletId,
         }
         return Database.users.find(user => user.id == id);
     }
