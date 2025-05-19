@@ -4,4 +4,5 @@ export class User {
     document: string;
     email: string;
     password: string;
+    walletsIds: string[];
 }

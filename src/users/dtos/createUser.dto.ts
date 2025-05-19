@@ -3,4 +3,5 @@ export class CreateUserDto {
     document: string;
     email: string;
     password: string;
+    walletsIds: string[]
 }

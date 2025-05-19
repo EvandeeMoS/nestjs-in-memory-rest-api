@@ -3,9 +3,12 @@ import { Database } from 'src/db';
 import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
+import { WalletsService } from 'src/wallets/wallets.service';
+import { Wallet } from 'src/wallets/entities/wallet.entity';
 
 @Injectable()
 export class UsersService {
+    constructor(private readonly walletsService: WalletsService) {}
 
     findAll() {
         return Database.users;
@@ -17,7 +20,8 @@ export class UsersService {
 
     create(data: CreateUserDto) {
         const id = randomUUID();
-        Database.users.push({id: id, ...data});
+        const wallet: Wallet = this.walletsService.create({value: 0, ownerId: id})!;
+        Database.users.push({id: id, ...data, walletsIds: [wallet.id]});
         return Database.users.find(user => user.id === id);
     }
 
@@ -30,6 +34,7 @@ export class UsersService {
             document: data.document? data.document : oldData!.document,
             email: data.email? data.email : oldData!.email,
             password: data.password? data.password : oldData!.password,
+            walletsIds: data.walletsIds? data.walletsIds : oldData!.walletsIds,
         }
         return Database.users.find(user => user.id == id);
     }

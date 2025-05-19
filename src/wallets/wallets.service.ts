@@ -7,11 +7,13 @@ import { randomUUID } from 'crypto';
 @Injectable()
 export class WalletsService {
   create(createWalletDto: CreateWalletDto) {
-    return Database.wallets.push({
-      id: randomUUID(), 
+    const id = randomUUID();
+    Database.wallets.push({
+      id: id, 
       value: createWalletDto.value, 
       ownerId: createWalletDto.ownerId
     });
+    return Database.wallets.find(wallet => wallet.id === id);
   }
 
   findAll() {
@@ -30,6 +32,36 @@ export class WalletsService {
       value: updateWalletDto.value? updateWalletDto.value : oldData!.value,
       ownerId: oldData!.ownerId
     };
+  }
+
+  deposit(id: string, value: number) {
+    if (value <= 0) {
+      return {
+        status: "400",
+        message: "Valor inválido para depósito"
+      }
+    }
+    const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
+    Database.wallets[walletIndex].value += value;
+
+    return Database.wallets[walletIndex];
+  }
+
+  withdraw(id: string, value: number) {
+    const wallet = this.findOne(id);
+    if (!wallet) {
+      return "invalid wallet"
+    }
+    if (value > wallet.value) {
+      return {
+        status: "400",
+        message: "Valor inválido para depósito"
+      }
+    }
+    const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
+    Database.wallets[walletIndex].value -= value;
+
+    return Database.wallets[walletIndex];
   }
 
   remove(id: string) {

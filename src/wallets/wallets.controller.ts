@@ -22,6 +22,16 @@ export class WalletsController {
     return this.walletsService.findOne(id);
   }
 
+  @Patch('deposit/:id')
+  deposit(@Param('id') id: string, @Body() data: { value: number }) {
+    return this.walletsService.deposit(id, +(data.value));
+  }
+
+  @Patch('withdraw/:id')
+  withdraw(@Param('id') id: string, @Body() data: { value: number }) {
+    return this.walletsService.deposit(id, +(data.value));
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateWalletDto: UpdateWalletDto) {
     return this.walletsService.update(id, updateWalletDto);
