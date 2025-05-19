@@ -1,0 +1,40 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { TransfersService } from './transfers.service';
+import { CreateTransferDto } from './dto/create-tranfer.dto';
+import { UpdateTransferDto } from './dto/update-transfer.dto';
+import { DataTransferDto } from './dto/data-transfer.dto';
+
+@Controller('transactions')
+export class TransfersController {
+  constructor(private readonly transfersService: TransfersService) {}
+
+  @Post()
+  create(@Body() createTransactionDto: CreateTransferDto) {
+    return this.transfersService.create(createTransactionDto);
+  }
+
+  @Post('new')
+  newTransaction(@Body() data: DataTransferDto) {
+    return this.transfersService.newTransaction(data);
+  }
+
+  @Get()
+  findAll() {
+    return this.transfersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.transfersService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransferDto) {
+    return this.transfersService.update(id, updateTransactionDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.transfersService.remove(id);
+  }
+}
