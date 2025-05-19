@@ -1,9 +1,11 @@
-import { UserEntity } from "./users/model/user.entity";
+import { User } from "./users/model/user.entity";
+import { Wallet } from "./wallets/entities/wallet.entity";
 
 export class Database {
     static #instance: Database
 
-    static users: UserEntity[] = [];
+    static users: User[] = [];
+    static wallets: Wallet[] = [];
     
     private constructor() {
     }
