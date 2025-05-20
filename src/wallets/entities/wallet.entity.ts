@@ -1,5 +1,9 @@
 export class Wallet {
     id: string;
     value: number;
-    ownerId: string;
+
+    constructor(id: string, value: number) {
+        this.id = id;
+        this.value = value
+    }
 }

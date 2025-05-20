@@ -1,19 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { Database } from 'src/db';
 import { randomUUID } from 'crypto';
+import { Wallet } from './entities/wallet.entity';
 
 @Injectable()
 export class WalletsService {
-  create(createWalletDto: CreateWalletDto) {
+  create(createWalletDto: CreateWalletDto): Wallet {
     const id = randomUUID();
-    Database.wallets.push({
-      id: id, 
-      value: createWalletDto.value, 
-      ownerId: createWalletDto.ownerId
-    });
-    return Database.wallets.find(wallet => wallet.id === id);
+    const newWallet: Wallet = new Wallet(id, createWalletDto.value)
+    Database.wallets.push(newWallet);
+    return newWallet;
   }
 
   findAll() {
@@ -21,42 +19,45 @@ export class WalletsService {
   }
 
   findOne(id: string) {
-    return Database.wallets.find(wallet => wallet.id == id);
+    const wallet = Database.wallets.find(wallet => wallet.id === id);
+    if (!wallet) {
+      throw new NotFoundException("Wallet not found!");
+    }
+    return wallet;
   }
 
   update(id: string, updateWalletDto: UpdateWalletDto) {
     const oldData = Database.wallets.find(wallet => wallet.id === id);
+    if (!oldData) {
+      throw new NotFoundException("Wallet not found!");
+    }
     const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
-    return Database.wallets[walletIndex] = {
-      id: oldData!.id,
-      value: updateWalletDto.value? updateWalletDto.value : oldData!.value,
-      ownerId: oldData!.ownerId
-    };
+    const { value } = updateWalletDto;
+    return Database.wallets[walletIndex] = new Wallet(
+      oldData.id,
+      value ? value : oldData.value,
+    );
   }
 
   deposit(id: string, value: number) {
     if (value <= 0) {
-      return {
-        status: "400",
-        message: "Valor inválido para depósito"
-      }
+      throw new BadRequestException("Value too low to deposit! The value must be greater than zero!")
     }
     const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
+    if (walletIndex === -1) {
+      throw new NotFoundException("Wallet not found!")
+    }
     Database.wallets[walletIndex].value += value;
-
     return Database.wallets[walletIndex];
   }
 
   withdraw(id: string, value: number) {
     const wallet = this.findOne(id);
     if (!wallet) {
-      return "invalid wallet"
+      throw new NotFoundException("Wallet not found!");
     }
     if (value > wallet.value) {
-      return {
-        status: "400",
-        message: "Valor inválido para depósito"
-      }
+      throw new BadRequestException("Value exceeds the amount of money in this wallet!");
     }
     const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
     Database.wallets[walletIndex].value -= value;
@@ -65,6 +66,10 @@ export class WalletsService {
   }
 
   remove(id: string) {
-    return Database.wallets.splice(Database.wallets.findIndex(wallet => wallet.id === id), 1);
+    const walletIndex = Database.wallets.findIndex(wallet => wallet.id === id);
+    if (walletIndex === -1) {
+      throw new NotFoundException("Wallet not found!");
+    }
+    return Database.wallets.splice(walletIndex, 1);
   }
 }

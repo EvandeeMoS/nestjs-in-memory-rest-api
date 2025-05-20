@@ -19,7 +19,7 @@ export class UsersService {
     findOne(id: string) {
         const user = Database.users.find(user => user.id === id);
         if (!user) {
-            throw new NotFoundException('User not found!');
+            throw new NotFoundException("User not found!");
         }
         return user;
     }
@@ -27,17 +27,16 @@ export class UsersService {
     create(data: CreateUserDto) {
         const id = randomUUID();
         const { fullName, document, email, password } = data;
-        const wallet: Wallet = this.walletsService.create({value: 0, ownerId: id})!;
-        Database.users.push(
-            new User(id, fullName, document, email, password, wallet.id)
-        );
-        return Database.users.find(user => user.id === id);
+        const wallet: Wallet = this.walletsService.create({value: 0});
+        const newUser: User = new User(id, fullName, document, email, password, wallet.id);
+        Database.users.push(newUser);
+        return newUser;
     }
 
     update(id: string, data: UpdateUserDto) {
         const oldData = Database.users.find(user => user.id === id);
         if (!oldData) {
-            throw new NotFoundException('User not found!');
+            throw new NotFoundException("User not found!");
         }
         const userIndex = Database.users.findIndex(user => user.id === id);
         const { fullName, document, email, password } = data;
@@ -55,7 +54,7 @@ export class UsersService {
     delete(id: string) {
         const userIndex = Database.users.findIndex(user => user.id === id);
         if (userIndex === -1) {
-            throw new NotFoundException('User not found!')
+            throw new NotFoundException("User not found!")
         }
         return Database.users.splice(userIndex, 1);
     }
