@@ -5,6 +5,8 @@ import { CreateUserDto } from './dtos/createUser.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { WalletsService } from 'src/wallets/wallets.service';
 import { Wallet } from 'src/wallets/entities/wallet.entity';
+import { User } from './model/user.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -15,31 +17,46 @@ export class UsersService {
     }
 
     findOne(id: string) {
-        return Database.users.find(user => user.id == id);
+        const user = Database.users.find(user => user.id === id);
+        if (!user) {
+            throw new NotFoundException('User not found!');
+        }
+        return user;
     }
 
     create(data: CreateUserDto) {
         const id = randomUUID();
-        const wallet: Wallet | undefined = this.walletsService.create({value: 0, ownerId: id})!;
-        Database.users.push({id: id, ...data, walletId: wallet.id});
+        const { fullName, document, email, password } = data;
+        const wallet: Wallet = this.walletsService.create({value: 0, ownerId: id})!;
+        Database.users.push(
+            new User(id, fullName, document, email, password, wallet.id)
+        );
         return Database.users.find(user => user.id === id);
     }
 
     update(id: string, data: UpdateUserDto) {
-        const oldData = Database.users.find(user => user.id == id);
-        const userIndex = Database.users.findIndex(user => user.id == id);
-        Database.users[userIndex] = {
-            id: oldData!.id,
-            fullName: data.fullName? data.fullName : oldData!.fullName,
-            document: data.document? data.document : oldData!.document,
-            email: data.email? data.email : oldData!.email,
-            password: data.password? data.password : oldData!.password,
-            walletId: data.walletId? data.walletId : oldData!.walletId,
+        const oldData = Database.users.find(user => user.id === id);
+        if (!oldData) {
+            throw new NotFoundException('User not found!');
         }
-        return Database.users.find(user => user.id == id);
+        const userIndex = Database.users.findIndex(user => user.id === id);
+        const { fullName, document, email, password } = data;
+        Database.users[userIndex] = new User(
+            oldData.id,
+            fullName ? fullName : oldData.fullName,
+            document ? document : oldData.document,
+            email    ? email    : oldData.email,
+            password ? password : oldData.password,
+            oldData.walletId
+        )
+        return Database.users.find(user => user.id === id);
     }
 
     delete(id: string) {
-        return Database.users.splice(Database.users.findIndex(user => user.id == id), 1);
+        const userIndex = Database.users.findIndex(user => user.id === id);
+        if (userIndex === -1) {
+            throw new NotFoundException('User not found!')
+        }
+        return Database.users.splice(userIndex, 1);
     }
 }
