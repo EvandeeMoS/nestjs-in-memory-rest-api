@@ -1,47 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateTransferDto } from './dto/create-tranfer.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { Database } from 'src/db';
 import { randomUUID } from 'crypto';
 import { UsersService } from 'src/users/users.service';
 import { WalletsService } from 'src/wallets/wallets.service';
-import { Wallet } from 'src/wallets/entities/wallet.entity';
 import { DataTransferDto } from './dto/data-transfer.dto';
+import { Transfer } from './entities/transfer.entity';
 
 @Injectable()
 export class TransfersService {
   constructor(private readonly usersService: UsersService, private readonly walletsService: WalletsService) {}
 
-  create(createTransactionDto: CreateTransferDto) {
+  private create(createTransactionDto: CreateTransferDto): Transfer {
     const id = randomUUID();
-    Database.transfers.push({id: id, ...createTransactionDto});
-    return Database.transfers.find(transaction => transaction.id === id);
+    const { value, payer, payee, createdAt, doneAt, status} = createTransactionDto;
+    const newTransfer: Transfer = new Transfer(id, value, payer, payee, createdAt, doneAt, status);
+    Database.transfers.push(newTransfer);
+    return newTransfer;
   }
 
-  newTransaction(data: DataTransferDto) {
+  async newTransaction(data: DataTransferDto) {
+    if (data.payer === data.payee) {
+      throw new BadRequestException("The payer can't be the same as the payee");
+    }
+    const payer = this.usersService.findOne(data.payer);
+    if (!payer) {
+      throw new NotFoundException("Payer not found!");
+    }
+    const payerWallet = this.walletsService.findOne(payer.walletId);
+    if (!payerWallet) {
+      throw new NotFoundException("Payer wallet not found!");
+    }
+    if (data.value <= 0 || data.value > payerWallet.value) {
+      console.log(data.value < payerWallet.value)
+      console.log(data.value + " " + payerWallet.value)
+      throw new BadRequestException("The value of the tranfer needs to be greater than 0 and less than the amount in payer wallet!");
+    }
+    const payee = this.usersService.findOne(data.payee);
+    if (!payee) {
+      throw new NotFoundException("Payee not found!");
+    }
     try {
-      console.log("entrou")
-      const payer = this.usersService.findOne(data.payer);
-      if (!payer) {
-        return "Invalid payer";
-      }
-      const payerWallet = this.walletsService.findOne(payer.walletId);
-      if (!payerWallet) {
-        return "This payer don't have a wallet";
-      }
-      if (data.value < 0 || data.value > payerWallet.value) {
-        console.log(data.value < payerWallet.value)
-        console.log(data.value + " " + payerWallet.value)
-        return "Invalid transaction value"
-      }
-      console.log("valor válido")
-      const payee = this.usersService.findOne(data.payee);
-      if (!payee) {
-        return "Invalid end user"
-      }
-      console.log("usuário final válido")
-      return Database.dbTransaction(() => {
-        const transaction = this.create({
+      const dataResult = await Database.dbTransaction(async () => {
+        let transfer = this.create({
           value: data.value,
           payer: data.payer,
           payee: data.payee,
@@ -49,14 +51,33 @@ export class TransfersService {
           doneAt: null,
           status: "PENDING"
         });
-        console.log(transaction)
+        const auth = await fetch("https://util.devi.tools/api/v2/authorize", {method: "GET"})
+          .then(async res => {
+            console.log(res)
+            if(!res.ok) {
+              throw new UnauthorizedException("Transfer not authorized!");
+            }
+            return res;
+          }
+        )
         this.walletsService.withdraw(payer.walletId, data.value);
         this.walletsService.deposit(payee.walletId, data.value);
-        this.update(transaction!.id, {status: 'DONE', doneAt: new Date()})
+        transfer = this.update(transfer.id, {status: 'DONE', doneAt: new Date()});
+        const notification =  await fetch("https://util.devi.tools/api/v1/notify", {method: "POST"})
+          .then(res => {
+            return res.ok;
+        })
+        return {
+          status: 201,
+          data: transfer,
+          authorization: auth.ok,
+          notification: notification,
+        }
       })
+      return dataResult;
     }
     catch (e) {
-      return "erro inesperado"
+      throw e;
     }
   }
 
@@ -65,27 +86,35 @@ export class TransfersService {
   }
 
   findOne(id: string) {
-    return Database.transfers.find(transaction => transaction.id === id);
+    const transfer = Database.transfers.find(transaction => transaction.id === id);
+    if (!transfer) {
+      throw new NotFoundException("Transfer not found!");
+    }
+    return transfer;
   }
 
   update(id: string, updateTransactionDto: UpdateTransferDto) {
     const oldData = Database.transfers.find(transaction => transaction.id === id);
     if (!oldData) {
-      return "Impossível de atualizar, usuário inválido!"
+      throw new NotFoundException("Transfer not found!");
     }
     const transactionIndex = Database.transfers.findIndex(transaction => transaction.id === id);
-    return Database.transfers[transactionIndex] = {
-      id: oldData.id,
-      value: oldData.value,
-      payer: oldData.payer,
-      payee: oldData.payee,
-      createdAt: oldData.createdAt,
-      doneAt: updateTransactionDto.doneAt ? updateTransactionDto.doneAt : oldData.doneAt,
-      status: updateTransactionDto.status ? updateTransactionDto.status : oldData.status
-    };
+    return Database.transfers[transactionIndex] = new Transfer(
+      oldData.id,
+      oldData.value,
+      oldData.payer,
+      oldData.payee,
+      oldData.createdAt,
+      updateTransactionDto.doneAt ? updateTransactionDto.doneAt : oldData.doneAt,
+      updateTransactionDto.status ? updateTransactionDto.status : oldData.status
+    );
   }
 
   remove(id: string) {
-    return Database.transfers.splice(Database.transfers.findIndex(transaction => transaction.id === id), 1);
+    const transfer = Database.transfers.findIndex(transaction => transaction.id === id);
+    if (!transfer) {
+      throw new NotFoundException("Transfer not found!");
+    }
+    return Database.transfers.splice(transfer, 1);
   }
 }
