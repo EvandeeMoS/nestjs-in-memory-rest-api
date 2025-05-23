@@ -1,6 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ValidationPipe,
+} from '@nestjs/common';
 import { TransfersService } from './transfers.service';
-import { CreateTransferDto } from './dto/create-tranfer.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { DataTransferDto } from './dto/data-transfer.dto';
 
@@ -29,7 +37,10 @@ export class TransfersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body(ValidationPipe) updateTransactionDto: UpdateTransferDto) {
+  update(
+    @Param('id') id: string,
+    @Body(ValidationPipe) updateTransactionDto: UpdateTransferDto,
+  ) {
     return this.transfersService.update(id, updateTransactionDto);
   }
 
