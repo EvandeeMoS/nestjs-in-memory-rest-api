@@ -1,9 +1,17 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class User {
+  @ApiProperty()
   id: string;
+  @ApiProperty()
   fullName: string;
+  @ApiProperty()
   document: string;
+  @ApiProperty()
   email: string;
+  @ApiProperty()
   password: string;
+  @ApiProperty()
   walletId: string;
 
   constructor(

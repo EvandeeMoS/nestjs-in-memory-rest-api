@@ -38,7 +38,7 @@ export class TransfersService {
     return newTransfer;
   }
 
-  async newTransaction(data: DataTransferDto) {
+  async newTransfer(data: DataTransferDto) {
     if (data.payer === data.payee) {
       throw new BadRequestException("The payer can't be the same as the payee");
     }

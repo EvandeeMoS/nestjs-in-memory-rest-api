@@ -1,11 +1,20 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class Transfer {
+  @ApiProperty()
   id: string;
+  @ApiProperty()
   value: number;
+  @ApiProperty()
   payer: string;
+  @ApiProperty()
   payee: string;
+  @ApiProperty()
   createdAt: Date;
+  @ApiProperty()
   doneAt: Date | null;
-  status: 'PENDING' | 'DONE' | 'CANCELED';
+  @ApiProperty({enum: {PENDING: 'PENDING', DONE: 'DONE' , CANCELLED: 'CANCELLED'}})
+  status: 'PENDING' | 'DONE' | 'CANCELLED';
 
   constructor(
     id: string,
@@ -14,7 +23,7 @@ export class Transfer {
     payee: string,
     createdAt: Date,
     doneAt: Date | null,
-    status: 'PENDING' | 'DONE' | 'CANCELED',
+    status: 'PENDING' | 'DONE' | 'CANCELLED',
   ) {
     this.id = id;
     this.value = value;
