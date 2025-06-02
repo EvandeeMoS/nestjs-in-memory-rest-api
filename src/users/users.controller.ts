@@ -33,8 +33,8 @@ export class UsersController {
 
   @Post()
   @ApiCreatedResponse({type: User, description: "The user was succefully created"})
-  create(@Body(ValidationPipe) data: CreateUserDto) {
-    return this.usersService.create(data);
+  async create(@Body(ValidationPipe) data: CreateUserDto) {
+    return await this.usersService.create(data);
   }
 
   @Patch(':id')

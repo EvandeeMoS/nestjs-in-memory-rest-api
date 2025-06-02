@@ -4,7 +4,10 @@ import {
   IsNotEmpty,
   IsEmail,
   IsStrongPassword,
+  IsEnum,
+  Length,
 } from 'class-validator';
+import { UserType } from '../model/user-type.enum';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -16,6 +19,7 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
+  @Length(11, 18)
   document: string;
   @ApiProperty()
   @IsEmail()
@@ -25,4 +29,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsStrongPassword()
   password: string;
+  @IsNotEmpty()
+  @IsEnum(UserType)
+  type: UserType
 }
