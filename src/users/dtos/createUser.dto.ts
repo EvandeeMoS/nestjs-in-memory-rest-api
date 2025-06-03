@@ -15,7 +15,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   fullName: string;
   @ApiProperty({
-    description: "CPF or CNPJ"
+    description: 'CPF or CNPJ',
   })
   @IsString()
   @IsNotEmpty()
@@ -31,5 +31,5 @@ export class CreateUserDto {
   password: string;
   @IsNotEmpty()
   @IsEnum(UserType)
-  type: UserType
+  type: UserType;
 }

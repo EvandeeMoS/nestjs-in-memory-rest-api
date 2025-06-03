@@ -43,6 +43,7 @@ export class TransfersService {
     if (data.payer === data.payee) {
       throw new BadRequestException("The payer can't be the same as the payee");
     }
+
     const payer = this.usersService.findOne(data.payer);
     if (!payer) {
       throw new NotFoundException('Payer not found!');
@@ -50,21 +51,22 @@ export class TransfersService {
     if (payer.type === UserType.SHOPKEEPER) {
       throw new BadRequestException("Shopkeepers can't make transfers");
     }
+
     const payerWallet = this.walletsService.findOne(payer.walletId);
     if (!payerWallet) {
       throw new NotFoundException('Payer wallet not found!');
     }
     if (data.value <= 0 || data.value > payerWallet.value) {
-      console.log(data.value < payerWallet.value);
-      console.log(data.value + ' ' + payerWallet.value);
       throw new BadRequestException(
         'The value of the tranfer needs to be greater than 0 and less than the amount in payer wallet!',
       );
     }
+
     const payee = this.usersService.findOne(data.payee);
     if (!payee) {
       throw new NotFoundException('Payee not found!');
     }
+
     const transaction = await Database.dbTransaction(async () => {
       let transfer = this.create({
         value: data.value,
@@ -74,31 +76,40 @@ export class TransfersService {
         doneAt: null,
         status: 'PENDING',
       });
+
       const auth = await fetch('https://util.devi.tools/api/v2/authorize', {
         method: 'GET',
-      }).then((res) => {
-        if (!res.ok) {
-          throw new UnauthorizedException('Transfer not authorized!');
-        }
-        return res;
       });
+      if (!auth.ok) {
+        throw new UnauthorizedException('Transfer not authorized!');
+      }
+
       this.walletsService.withdraw(payer.walletId, data.value);
       this.walletsService.deposit(payee.walletId, data.value);
       transfer = this.update(transfer.id, {
         status: 'DONE',
         doneAt: new Date(),
       });
+
       const notification = await fetch(
         'https://util.devi.tools/api/v1/notify',
-        { method: 'POST' },
-      ).then((res) => {
-        return res.ok;
-      });
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            value: data.value,
+            payer: payer.fullName,
+            payerDocument: this.usersService.hideDocument(payee),
+            payee: payee.fullName,
+            payeeDocument: this.usersService.hideDocument(payer),
+          }),
+        },
+      );
+
       return {
         status: 201,
         data: transfer,
         authorization: auth.ok,
-        notification: notification,
+        notification: notification.ok,
       };
     });
     const dataResult: TransferResult = <TransferResult>transaction.data;

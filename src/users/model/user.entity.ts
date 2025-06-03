@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { UserType } from "./user-type.enum";
+import { ApiProperty } from '@nestjs/swagger';
+import { UserType } from './user-type.enum';
 
 export class User {
   @ApiProperty()
@@ -24,7 +24,7 @@ export class User {
     email: string,
     password: string,
     walletId: string,
-    type: UserType
+    type: UserType,
   ) {
     this.id = id;
     this.fullName = fullName;

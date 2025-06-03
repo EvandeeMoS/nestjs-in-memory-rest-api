@@ -15,7 +15,7 @@ export class Database {
       email: 'email@email.com',
       password: '12345678!aB',
       walletId: 'f24f39fb-d1ff-428e-81ef-430aa98eafa9',
-      type: UserType.PERSON
+      type: UserType.PERSON,
     },
     {
       id: '94dcd60e-f402-478c-bd82-838de9101390',
@@ -24,7 +24,7 @@ export class Database {
       email: 'email2@email.com',
       password: '12345678!aB',
       walletId: '11645b70-1e9f-4d2a-a2d9-12de49e57ccf',
-      type: UserType.PERSON
+      type: UserType.PERSON,
     },
   ];
   static wallets: Wallet[] = [

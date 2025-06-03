@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class Transfer {
   @ApiProperty()
@@ -13,7 +13,9 @@ export class Transfer {
   createdAt: Date;
   @ApiProperty()
   doneAt: Date | null;
-  @ApiProperty({enum: {PENDING: 'PENDING', DONE: 'DONE' , CANCELLED: 'CANCELLED'}})
+  @ApiProperty({
+    enum: { PENDING: 'PENDING', DONE: 'DONE', CANCELLED: 'CANCELLED' },
+  })
   status: 'PENDING' | 'DONE' | 'CANCELLED';
 
   constructor(
