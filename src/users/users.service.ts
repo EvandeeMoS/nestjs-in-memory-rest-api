@@ -43,12 +43,13 @@ export class UsersService {
       if (Database.users.find(e => e.email === email)) {
         throw new BadRequestException("This email is already present in our database");
       }
+      const rawDocument = document.replaceAll(".", "").replaceAll("-", "").replaceAll("/", "")
       const wallet: Wallet = this.walletsService.create({ value: 0 });
       const hashedPassword = await bcrypt.hash(password, 12);
       const newUser: User = new User(
         id,
         fullName,
-        document,
+        rawDocument,
         email,
         hashedPassword,
         wallet.id,
@@ -205,5 +206,13 @@ export class UsersService {
     
     return [variableDigits, verifierDigits]
   }
-  
+ 
+  hideDocument(user: User) {
+    if (user.type === UserType.PERSON) {
+      return `***.***.${user.document.substring(6,9)}-**`
+    }
+    if (user.type === UserType.SHOPKEEPER) {
+      return `**.***.${user.document.substring(5,8)}/${user.document.substring(8,12)}-**`
+    }
+  }
 }
