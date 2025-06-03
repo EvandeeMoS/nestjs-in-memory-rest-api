@@ -13,6 +13,7 @@ import { WalletsService } from 'src/wallets/wallets.service';
 import { DataTransferDto } from './dto/data-transfer.dto';
 import { Transfer } from './entities/transfer.entity';
 import { TransferResult } from './dto/transfer-result.dto';
+import { UserType } from 'src/users/model/user-type.enum';
 
 @Injectable()
 export class TransfersService {
@@ -46,6 +47,9 @@ export class TransfersService {
     if (!payer) {
       throw new NotFoundException('Payer not found!');
     }
+    if (payer.type === UserType.SHOPKEEPER) {
+      throw new BadRequestException("Shopkeepers can't make transfers");
+    }
     const payerWallet = this.walletsService.findOne(payer.walletId);
     if (!payerWallet) {
       throw new NotFoundException('Payer wallet not found!');
@@ -73,7 +77,6 @@ export class TransfersService {
       const auth = await fetch('https://util.devi.tools/api/v2/authorize', {
         method: 'GET',
       }).then((res) => {
-        console.log(res);
         if (!res.ok) {
           throw new UnauthorizedException('Transfer not authorized!');
         }

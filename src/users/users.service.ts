@@ -152,20 +152,17 @@ export class UsersService {
     }
     document = document.trim().replaceAll(".", "").replaceAll("/", "").replaceAll("-", "");
     if (document.length != 14) {
-      console.log(document.length, document)
       throw new InvalidDocumentException("Invalid CNPJ length!");
     }
     const cnpjArr = document.split("").map((e) => Number.parseInt(e));
     const variableDigits = cnpjArr.slice(0, 12);
     const verifierDigits = cnpjArr.slice(12);
-    console.log(variableDigits, verifierDigits)
 
     let sum = 0;
     let multiplier = 2;
 
     for (let i = variableDigits.length - 1; i >= 0; i--) {
       sum += variableDigits[i] * multiplier
-      console.log(sum, variableDigits[i] * multiplier, multiplier, variableDigits[i])
       multiplier++
       if (multiplier > 9) {
         multiplier = 2
@@ -188,7 +185,6 @@ export class UsersService {
     multiplier = 2
     for (let i = variableDigits.length - 1; i >= 0; i--) {
       sum += variableDigits[i] * multiplier
-      console.log(sum, variableDigits[i] * multiplier, multiplier, variableDigits[i])
       multiplier++
       if (multiplier > 9) {
         multiplier = 2
