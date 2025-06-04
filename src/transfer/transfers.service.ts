@@ -91,7 +91,7 @@ export class TransfersService {
         doneAt: new Date(),
       });
 
-      const notification = await fetch(
+      fetch(
         'https://util.devi.tools/api/v1/notify',
         {
           method: 'POST',
@@ -103,13 +103,18 @@ export class TransfersService {
             payeeDocument: this.usersService.hideDocument(payer),
           }),
         },
-      );
+      )
+      .then(res => {
+        console.log(new Date() + " | transfer: " + transfer.id + " - notification status: " + res.ok)
+      })
+      .catch(err => {
+        console.log(err)
+      });
 
       return {
         status: 201,
         data: transfer,
         authorization: auth.ok,
-        notification: notification.ok,
       };
     });
     const dataResult: TransferResult = <TransferResult>transaction.data;
