@@ -7,7 +7,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Banco Simplificado em memória')
-    .setDescription('Inspirado pelo desafio técnico do picpay')
+    .setDescription('Inspirado num desafio técnico de uma fintech')
     .setVersion('1.0')
     .addTag('bank')
     .addGlobalResponse({ status: 500, description: 'Internal Server Error' })
