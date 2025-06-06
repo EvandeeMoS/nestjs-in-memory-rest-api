@@ -3,4 +3,5 @@ dotenv.config();
 
 export const jwtConstants = {
   secret: process.env.secret,
+  expiresIn: '2h'
 };
