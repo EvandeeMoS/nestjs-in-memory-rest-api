@@ -44,7 +44,11 @@ export class UsersService {
     if (type == UserType.SHOPKEEPER) {
       this.validateCNPJ(document);
     }
-    if (Database.users.find((e) => e.document === document)) {
+    const rawDocument = document
+      .replaceAll('.', '')
+      .replaceAll('-', '')
+      .replaceAll('/', '');
+    if (Database.users.find((e) => e.document === rawDocument)) {
       throw new BadRequestException(
         'This document is already present in our database',
       );
@@ -54,10 +58,6 @@ export class UsersService {
         'This email is already present in our database',
       );
     }
-    const rawDocument = document
-      .replaceAll('.', '')
-      .replaceAll('-', '')
-      .replaceAll('/', '');
     const wallet: Wallet = this.walletsService.create({ value: 0 });
     const hashedPassword: string = await bcrypt.hash(password, 12);
     const newUser: User = new User(
