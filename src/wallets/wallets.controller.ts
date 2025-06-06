@@ -16,16 +16,18 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Wallet } from './entities/wallet.entity';
 
 @Controller('wallets')
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 export class WalletsController {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Get()
   @ApiOkResponse({
-    description: 'The list of all wallets',
+    description: 'Ok. The list of all wallets',
     type: Wallet,
     isArray: true,
   })
@@ -34,14 +36,17 @@ export class WalletsController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ description: 'The wallet with the id passed', type: Wallet })
+  @ApiOkResponse({
+    description: 'Ok. The wallet with the id passed',
+    type: Wallet,
+  })
   findOne(@Param('id') id: string) {
     return this.walletsService.findOne(id);
   }
 
   @Post()
   @ApiCreatedResponse({
-    description: 'The wallet was succefuly created',
+    description: 'Created. The wallet was succefuly created',
     type: Wallet,
   })
   create(@Body(ValidationPipe) createWalletDto: CreateWalletDto) {
@@ -50,11 +55,13 @@ export class WalletsController {
 
   @Patch('deposit/:id')
   @ApiOkResponse({
-    description: 'The deposit was succefully done',
+    description: 'Ok. The deposit was succefully done',
     type: Wallet,
   })
-  @ApiBadRequestResponse({ description: 'The value to deposit was invalid' })
-  @ApiNotFoundResponse({ description: 'The wallet was not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request. The value to deposit was invalid',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found. The wallet was not found' })
   deposit(
     @Param('id') id: string,
     @Body(ValidationPipe) data: CreateWalletDto,
@@ -64,11 +71,13 @@ export class WalletsController {
 
   @Patch('withdraw/:id')
   @ApiOkResponse({
-    description: 'The withdraw was succefully done',
+    description: 'Ok. The withdraw was succefully done',
     type: Wallet,
   })
-  @ApiBadRequestResponse({ description: 'The value to withdraw was invalid' })
-  @ApiNotFoundResponse({ description: 'The wallet was not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request. The value to withdraw was invalid',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found. The wallet was not found' })
   withdraw(
     @Param('id') id: string,
     @Body(ValidationPipe) data: CreateWalletDto,
@@ -78,10 +87,12 @@ export class WalletsController {
 
   @Patch(':id')
   @ApiOkResponse({
-    description: 'The update was succefully done',
+    description: 'Ok. The update was succefully done',
     type: Wallet,
   })
-  @ApiBadRequestResponse({ description: 'The wallet was not found' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request. The wallet was not found',
+  })
   update(
     @Param('id') id: string,
     @Body(ValidationPipe) updateWalletDto: UpdateWalletDto,
@@ -90,8 +101,8 @@ export class WalletsController {
   }
 
   @Delete(':id')
-  @ApiOkResponse({ description: 'Deletion succefully done', type: Wallet })
-  @ApiNotFoundResponse({ description: 'The wallet was not found' })
+  @ApiOkResponse({ description: 'Ok. Deletion succefully done', type: Wallet })
+  @ApiNotFoundResponse({ description: 'Not Found. The wallet was not found' })
   remove(@Param('id') id: string) {
     return this.walletsService.remove(id);
   }

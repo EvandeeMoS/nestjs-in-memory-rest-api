@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { Public } from './public.decorator';
+import { ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +18,9 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized. Invalid Credentials',
+  })
   login(@Body(ValidationPipe) credentials: SignInDto) {
     return this.authService.signIn(credentials);
   }

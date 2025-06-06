@@ -32,7 +32,7 @@ export class TransfersController {
   @Post()
   @ApiCreatedResponse({
     type: TransferResult,
-    description: 'The transfer was succefully created',
+    description: 'Created. The transfer was succefully created',
   })
   @ApiBadRequestResponse({
     description:
@@ -58,7 +58,7 @@ export class TransfersController {
   @Get(':id')
   @ApiOkResponse({
     type: Transfer,
-    description: 'Return a transfer with the passed id',
+    description: 'Ok. Return a transfer with the passed id',
   })
   @ApiNotFoundResponse({
     description: "Not found. A transfer with the passed id doesn't exist",

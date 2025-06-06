@@ -9,8 +9,8 @@ async function bootstrap() {
     .addBearerAuth()
     .setTitle('Banco Simplificado em memória')
     .setDescription('Inspirado num desafio técnico de uma fintech')
+    .setContact('EvandeeMoS', '', 'evandemoisesjob64@gmail.com')
     .setVersion('1.0')
-    .addTag('bank')
     .addGlobalResponse({ status: 500, description: 'Internal Server Error' })
     .build();
 

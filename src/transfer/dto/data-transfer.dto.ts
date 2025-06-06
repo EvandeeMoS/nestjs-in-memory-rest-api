@@ -3,18 +3,21 @@ import { IsNotEmpty, Min } from 'class-validator';
 
 export class DataTransferDto {
   @ApiProperty({
-    description: 'The amount to transfer',
+    description: 'The value to transfer',
+    type: Number,
     minimum: 0.01,
   })
   @Min(0.01)
   value: number;
   @ApiProperty({
-    description: 'The one who pays',
+    description: 'The id of the payer',
+    type: String,
   })
   @IsNotEmpty()
   payer: string;
   @ApiProperty({
-    description: 'The one who recieve',
+    description: 'The id of the payee',
+    type: String,
   })
   @IsNotEmpty()
   payee: string;

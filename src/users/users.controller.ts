@@ -17,12 +17,14 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from './model/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Public } from 'src/auth/public.decorator';
 
 @Controller('users')
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -32,7 +34,7 @@ export class UsersController {
   @ApiOkResponse({
     isArray: true,
     type: User,
-    description: 'List of all users',
+    description: 'Ok. List of all users',
   })
   findAll() {
     return this.usersService.findAll();
@@ -41,7 +43,7 @@ export class UsersController {
   @Get(':id')
   @ApiOkResponse({
     type: User,
-    description: 'List the user with the passed Id',
+    description: 'Ok. List the user with the passed Id',
   })
   @ApiNotFoundResponse({
     description: "Not found. A user with the passed id doesn't exist",
@@ -54,14 +56,17 @@ export class UsersController {
   @Public()
   @ApiCreatedResponse({
     type: User,
-    description: 'The user was succefully created',
+    description: 'Created. The user was succefully created',
   })
   async create(@Body(ValidationPipe) data: CreateUserDto) {
     return await this.usersService.create(data);
   }
 
   @Patch(':id')
-  @ApiOkResponse({ type: User, description: 'The user was succefully updated' })
+  @ApiOkResponse({
+    type: User,
+    description: 'Ok. The user was succefully updated',
+  })
   @ApiNotFoundResponse({
     description: "Not found. A user with the passed id doesn't exist",
   })
@@ -70,7 +75,10 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ApiOkResponse({ type: User, description: 'The user was succefully deleted' })
+  @ApiOkResponse({
+    type: User,
+    description: 'Ok. The user was succefully deleted',
+  })
   @ApiNotFoundResponse({
     description: "Not found. A user with the passed id doesn't exist",
   })

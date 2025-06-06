@@ -7,10 +7,16 @@ import {
 } from 'class-validator';
 
 export class SignInDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The user email',
+    type: String,
+  })
   @IsEmail()
   email: string;
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The user password',
+    type: String,
+  })
   @IsString()
   @IsNotEmpty()
   @IsStrongPassword()
