@@ -6,23 +6,29 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { ValidationPipe } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { User } from './model/user.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Public } from 'src/auth/public.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
+  @ApiBearerAuth()
   @ApiOkResponse({
     isArray: true,
     type: User,
@@ -45,6 +51,7 @@ export class UsersController {
   }
 
   @Post()
+  @Public()
   @ApiCreatedResponse({
     type: User,
     description: 'The user was succefully created',

@@ -27,6 +27,14 @@ export class UsersService {
     return user;
   }
 
+  findOneByEmail(email: string) {
+    const user = Database.users.find((user) => user.email === email);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    return user;
+  }
+
   async create(data: CreateUserDto) {
     const id = randomUUID();
     const { fullName, document, email, password, type } = data;

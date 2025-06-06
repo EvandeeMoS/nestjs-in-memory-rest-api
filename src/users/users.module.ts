@@ -1,10 +1,20 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { WalletsService } from 'src/wallets/wallets.service';
+import { WalletsModule } from 'src/wallets/wallets.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Module({
-  providers: [UsersService, WalletsService],
+  providers: [
+    UsersService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   controllers: [UsersController],
+  imports: [WalletsModule],
+  exports: [UsersService],
 })
 export class UsersModule {}

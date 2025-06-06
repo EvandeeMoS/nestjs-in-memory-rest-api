@@ -6,6 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Banco Simplificado em memória')
     .setDescription('Inspirado num desafio técnico de uma fintech')
     .setVersion('1.0')

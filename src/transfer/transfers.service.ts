@@ -91,25 +91,28 @@ export class TransfersService {
         doneAt: new Date(),
       });
 
-      fetch(
-        'https://util.devi.tools/api/v1/notify',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            value: data.value,
-            payer: payer.fullName,
-            payerDocument: this.usersService.hideDocument(payee),
-            payee: payee.fullName,
-            payeeDocument: this.usersService.hideDocument(payer),
-          }),
-        },
-      )
-      .then(res => {
-        console.log(new Date() + " | transfer: " + transfer.id + " - notification status: " + res.ok)
+      fetch('https://util.devi.tools/api/v1/notify', {
+        method: 'POST',
+        body: JSON.stringify({
+          value: data.value,
+          payer: payer.fullName,
+          payerDocument: this.usersService.hideDocument(payee),
+          payee: payee.fullName,
+          payeeDocument: this.usersService.hideDocument(payer),
+        }),
       })
-      .catch(err => {
-        console.log(err)
-      });
+        .then((res) => {
+          console.log(
+            new Date().toString() +
+              ' | transfer: ' +
+              transfer.id +
+              ' - notification status: ' +
+              res.ok,
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+        });
 
       return {
         status: 201,
