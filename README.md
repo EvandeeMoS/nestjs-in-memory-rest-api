@@ -13,6 +13,12 @@ Para testar o projeto, basta fazer o download dos arquivos e executar:
 npm install
 ```
 
+Depois, crie uma variável de ambiente denomidada "SECRET" ou crie um arquivo .env na raiz e crie uma variável SECRET dentro dele, como por exemplo:
+```
+# project-root/.env
+SECRET=PUT YOUR SECRET HERE
+```
+
 Após isso, as dependencias serão baixadas e após o término execute o comando para iniciar o servidor web local:
 ```bash
 npm run start
