@@ -16,11 +16,11 @@ export class UsersService {
   constructor(private readonly walletsService: WalletsService) {}
 
   findAll() {
-    return Database.users;
+    return Database.instance.users;
   }
 
   findOne(id: string) {
-    const user = Database.users.find((user) => user.id === id);
+    const user = Database.instance.users.find((user) => user.id === id);
     if (!user) {
       throw new NotFoundException('User not found!');
     }
@@ -28,7 +28,7 @@ export class UsersService {
   }
 
   findOneByEmail(email: string) {
-    const user = Database.users.find((user) => user.email === email);
+    const user = Database.instance.users.find((user) => user.email === email);
     if (!user) {
       throw new NotFoundException('User not found!');
     }
@@ -48,12 +48,12 @@ export class UsersService {
       .replaceAll('.', '')
       .replaceAll('-', '')
       .replaceAll('/', '');
-    if (Database.users.find((e) => e.document === rawDocument)) {
+    if (Database.instance.users.find((e) => e.document === rawDocument)) {
       throw new BadRequestException(
         'This document is already present in our database',
       );
     }
-    if (Database.users.find((e) => e.email === email)) {
+    if (Database.instance.users.find((e) => e.email === email)) {
       throw new BadRequestException(
         'This email is already present in our database',
       );
@@ -69,18 +69,18 @@ export class UsersService {
       wallet.id,
       type,
     );
-    Database.users.push(newUser);
+    Database.instance.users.push(newUser);
     return newUser;
   }
 
   update(id: string, data: UpdateUserDto) {
-    const oldData = Database.users.find((user) => user.id === id);
+    const oldData = Database.instance.users.find((user) => user.id === id);
     if (!oldData) {
       throw new NotFoundException('User not found!');
     }
-    const userIndex = Database.users.findIndex((user) => user.id === id);
+    const userIndex = Database.instance.users.findIndex((user) => user.id === id);
     const { fullName, document, email, password } = data;
-    Database.users[userIndex] = new User(
+    Database.instance.users[userIndex] = new User(
       oldData.id,
       fullName ? fullName : oldData.fullName,
       document ? document : oldData.document,
@@ -89,24 +89,23 @@ export class UsersService {
       oldData.walletId,
       oldData.type,
     );
-    return Database.users.find((user) => user.id === id);
+    return Database.instance.users.find((user) => user.id === id);
   }
 
   delete(id: string) {
-    const userIndex = Database.users.findIndex((user) => user.id === id);
+    const userIndex = Database.instance.users.findIndex((user) => user.id === id);
     if (userIndex === -1) {
       throw new NotFoundException('User not found!');
     }
-    return Database.users.splice(userIndex, 1);
+    return Database.instance.users.splice(userIndex, 1)[0];
   }
 
   validateCPF(document: string) {
-    if (!document.match(/[0-9]{3}[.]?[0-9]{3}[.][0-9]{3}[-]?[0-9]{2}/)) {
+    if (!document.match(/[0-9]{3}[.]?[0-9]{3}[.]?[0-9]{3}[-]?[0-9]{2}/)) {
       throw new InvalidDocumentException('Invalid CPF estructure');
     }
     document = document.trim().replaceAll('.', '').replaceAll('-', '');
     if (document.length != 11) {
-      console.log(document.length, document);
       throw new InvalidDocumentException('Invalid CPF length!');
     }
     const cpfArr = document.split('').map((e) => Number.parseInt(e));
@@ -118,12 +117,6 @@ export class UsersService {
 
     for (let i = variableDigits.length - 1; i >= 0; i--) {
       sum += variableDigits[i] * multiplier;
-      console.log(
-        sum,
-        variableDigits[i] * multiplier,
-        multiplier,
-        variableDigits[i],
-      );
       multiplier++;
     }
     let resultDigit1 = sum % 11;
@@ -143,12 +136,6 @@ export class UsersService {
     multiplier = 2;
     for (let i = variableDigits.length - 1; i >= 0; i--) {
       sum += variableDigits[i] * multiplier;
-      console.log(
-        sum,
-        variableDigits[i] * multiplier,
-        multiplier,
-        variableDigits[i],
-      );
       multiplier++;
     }
     let resultDigit2 = sum % 11;

@@ -17,11 +17,11 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('login')
+  @Post('signIn')
   @ApiUnauthorizedResponse({
     description: 'Unauthorized. Invalid Credentials',
   })
-  login(@Body(ValidationPipe) credentials: SignInDto) {
+  signIn(@Body(ValidationPipe) credentials: SignInDto) {
     return this.authService.signIn(credentials);
   }
 }

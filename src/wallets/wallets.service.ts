@@ -14,16 +14,16 @@ export class WalletsService {
   create(createWalletDto: CreateWalletDto): Wallet {
     const id = randomUUID();
     const newWallet: Wallet = new Wallet(id, createWalletDto.value);
-    Database.wallets.push(newWallet);
+    Database.instance.wallets.push(newWallet);
     return newWallet;
   }
 
   findAll() {
-    return Database.wallets;
+    return Database.instance.wallets;
   }
 
   findOne(id: string) {
-    const wallet = Database.wallets.find((wallet) => wallet.id === id);
+    const wallet = Database.instance.wallets.find((wallet) => wallet.id === id);
     if (!wallet) {
       throw new NotFoundException('Wallet not found!');
     }
@@ -31,15 +31,15 @@ export class WalletsService {
   }
 
   update(id: string, updateWalletDto: UpdateWalletDto) {
-    const oldData = Database.wallets.find((wallet) => wallet.id === id);
+    const oldData = Database.instance.wallets.find((wallet) => wallet.id === id);
     if (!oldData) {
       throw new NotFoundException('Wallet not found!');
     }
-    const walletIndex = Database.wallets.findIndex(
+    const walletIndex = Database.instance.wallets.findIndex(
       (wallet) => wallet.id === id,
     );
     const { value } = updateWalletDto;
-    return (Database.wallets[walletIndex] = new Wallet(
+    return (Database.instance.wallets[walletIndex] = new Wallet(
       oldData.id,
       value ? value : oldData.value,
     ));
@@ -51,18 +51,18 @@ export class WalletsService {
         'Value too low to deposit! The value must be greater than zero!',
       );
     }
-    const walletIndex = Database.wallets.findIndex(
+    const walletIndex = Database.instance.wallets.findIndex(
       (wallet) => wallet.id === id,
     );
     if (walletIndex === -1) {
       throw new NotFoundException('Wallet not found!');
     }
-    Database.wallets[walletIndex].value += value;
-    return Database.wallets[walletIndex];
+    Database.instance.wallets[walletIndex].value += value;
+    return Database.instance.wallets[walletIndex];
   }
 
   withdraw(id: string, value: number) {
-    const wallet = this.findOne(id);
+    const wallet = Database.instance.wallets.find(user => user.id === id);
     if (!wallet) {
       throw new NotFoundException('Wallet not found!');
     }
@@ -71,21 +71,21 @@ export class WalletsService {
         'Value exceeds the amount of money in this wallet!',
       );
     }
-    const walletIndex = Database.wallets.findIndex(
+    const walletIndex = Database.instance.wallets.findIndex(
       (wallet) => wallet.id === id,
     );
-    Database.wallets[walletIndex].value -= value;
+    Database.instance.wallets[walletIndex].value -= value;
 
-    return Database.wallets[walletIndex];
+    return Database.instance.wallets[walletIndex];
   }
 
   remove(id: string) {
-    const walletIndex = Database.wallets.findIndex(
+    const walletIndex = Database.instance.wallets.findIndex(
       (wallet) => wallet.id === id,
     );
     if (walletIndex === -1) {
       throw new NotFoundException('Wallet not found!');
     }
-    return Database.wallets.splice(walletIndex, 1);
+    return Database.instance.wallets.splice(walletIndex, 1)[0];
   }
 }

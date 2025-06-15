@@ -35,7 +35,7 @@ export class TransfersService {
       doneAt,
       status,
     );
-    Database.transfers.push(newTransfer);
+    Database.instance.transfers.push(newTransfer);
     return newTransfer;
   }
 
@@ -67,7 +67,7 @@ export class TransfersService {
       throw new NotFoundException('Payee not found!');
     }
 
-    const transaction = await Database.dbTransaction(async () => {
+    const transaction = await Database.instance.dbTransaction(async () => {
       let transfer = this.create({
         value: data.value,
         payer: data.payer,
@@ -77,9 +77,8 @@ export class TransfersService {
         status: 'PENDING',
       });
 
-      const auth = await fetch('https://util.devi.tools/api/v2/authorize', {
-        method: 'GET',
-      });
+      const auth = await this.checkTransferAuthorization()
+      
       if (!auth.ok) {
         throw new UnauthorizedException('Transfer not authorized!');
       }
@@ -101,18 +100,6 @@ export class TransfersService {
           payeeDocument: this.usersService.hideDocument(payer),
         }),
       })
-        .then((res) => {
-          console.log(
-            new Date().toString() +
-              ' | transfer: ' +
-              transfer.id +
-              ' - notification status: ' +
-              res.ok,
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
 
       return {
         status: 201,
@@ -125,11 +112,11 @@ export class TransfersService {
   }
 
   findAll() {
-    return Database.transfers;
+    return Database.instance.transfers;
   }
 
   findOne(id: string) {
-    const transfer = Database.transfers.find(
+    const transfer = Database.instance.transfers.find(
       (transaction) => transaction.id === id,
     );
     if (!transfer) {
@@ -138,38 +125,44 @@ export class TransfersService {
     return transfer;
   }
 
-  update(id: string, updateTransactionDto: UpdateTransferDto) {
-    const oldData = Database.transfers.find(
+  update(id: string, updateTransferDto: UpdateTransferDto) {
+    const oldData = Database.instance.transfers.find(
       (transaction) => transaction.id === id,
     );
     if (!oldData) {
       throw new NotFoundException('Transfer not found!');
     }
-    const transactionIndex = Database.transfers.findIndex(
+    const transferIndex = Database.instance.transfers.findIndex(
       (transaction) => transaction.id === id,
     );
-    return (Database.transfers[transactionIndex] = new Transfer(
+    return (Database.instance.transfers[transferIndex] = new Transfer(
       oldData.id,
       oldData.value,
       oldData.payer,
       oldData.payee,
       oldData.createdAt,
-      updateTransactionDto.doneAt
-        ? updateTransactionDto.doneAt
+      updateTransferDto.doneAt
+        ? updateTransferDto.doneAt
         : oldData.doneAt,
-      updateTransactionDto.status
-        ? updateTransactionDto.status
+      updateTransferDto.status
+        ? updateTransferDto.status
         : oldData.status,
     ));
   }
 
-  remove(id: string) {
-    const transfer = Database.transfers.findIndex(
-      (transaction) => transaction.id === id,
+  delete(id: string) {
+    const transfer = Database.instance.transfers.findIndex(
+      (transfer) => transfer.id === id,
     );
-    if (!transfer) {
+    if (transfer === -1) {
       throw new NotFoundException('Transfer not found!');
     }
-    return Database.transfers.splice(transfer, 1);
+    return Database.instance.transfers.splice(transfer, 1)[0];
+  }
+
+  async checkTransferAuthorization() {
+    return await fetch('https://util.devi.tools/api/v2/authorize', {
+      method: 'GET',
+    });
   }
 }

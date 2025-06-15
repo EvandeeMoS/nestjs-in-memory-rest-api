@@ -83,6 +83,6 @@ export class TransfersController {
     description: "Not found. A transfer with the passed id doesn't exist",
   })
   remove(@Param('id') id: string) {
-    return this.transfersService.remove(id);
+    return this.transfersService.delete(id);
   }
 }

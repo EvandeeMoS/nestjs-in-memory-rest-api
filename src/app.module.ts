@@ -10,11 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    UsersModule,
-    Database,
-    WalletsModule,
-    TransfersModule,
     AuthModule,
+    TransfersModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

@@ -7,7 +7,7 @@ import { TransactionResult } from './dto/transaction-result.dto';
 export class Database {
   static #instance: Database;
 
-  static users: User[] = [
+  users: User[] = [
     {
       id: 'c0d72d77-7512-42a7-a6b0-5281343d6d2c',
       fullName: 'pedro',
@@ -27,7 +27,7 @@ export class Database {
       type: UserType.PERSON,
     },
   ];
-  static wallets: Wallet[] = [
+  wallets: Wallet[] = [
     {
       id: 'f24f39fb-d1ff-428e-81ef-430aa98eafa9',
       value: 200,
@@ -37,7 +37,7 @@ export class Database {
       value: 200,
     },
   ];
-  static transfers: Transfer[] = [];
+  transfers: Transfer[] = [];
 
   private constructor() {}
 
@@ -49,20 +49,20 @@ export class Database {
     return Database.#instance;
   }
 
-  static async dbTransaction(
+  async dbTransaction(
     action: () => unknown,
   ): Promise<TransactionResult> {
-    const oldUsersTableState = [...Database.users];
-    const oldWalletTableState = [...Database.wallets];
-    const oldTransfersTableState = [...Database.transfers];
+    const oldUsersTableState = [...this.users];
+    const oldWalletTableState = [...this.wallets];
+    const oldTransfersTableState = [...this.transfers];
     try {
       const result = await action();
       const transactionResult = new TransactionResult(true, result);
       return transactionResult;
     } catch (e) {
-      Database.users = oldUsersTableState;
-      Database.wallets = oldWalletTableState;
-      Database.transfers = oldTransfersTableState;
+      this.users = oldUsersTableState;
+      this.wallets = oldWalletTableState;
+      this.transfers = oldTransfersTableState;
       throw e;
     }
   }
